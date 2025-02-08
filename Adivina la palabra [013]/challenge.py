@@ -39,8 +39,23 @@ def update_counter(tries_counter:int) -> int:
     tries_counter -= 1
     return tries_counter
 
-def solving_word(original_word:str, word:str, idx_to_char:Dict, selected_letters:List[str]):
-    pass
+def solving_word(original_word:str, word:str, idx_to_char:Dict, selected_char:str):
+    
+    # Obtengo los índices donde se posiciona el carácter escogido
+    idxs_to_change = [idx for idx, char in idx_to_char.items() if (char == selected_char)]
+    
+    if (len(idxs_to_change) > 0):
+        # Implemento el carácter escogido en la palabra con espacios
+        chars_in_word = [char for char in word]
+        for idx, char in enumerate(chars_in_word):
+            if idx in idxs_to_change:
+                chars_in_word[idx] = idx_to_char[idx]
+        word = "".join(chars_in_word)
+        
+        # Actualizo el diccionario eliminando estos índices
+        for idx in idxs_to_change:
+            del idx_to_char[idx]
+    return word
 
 def show_word_and_counter(word:str, counter_tries:int):
     
@@ -95,7 +110,7 @@ if __name__ == "__main__":
         word_to_solve, remaining_chars, hidden_chars = solving_word(original_word=random_word,
                                                                     word=word_to_solve,
                                                                     idx_to_char=idx_to_char,
-                                                                    selected_letters=[])
+                                                                    selected_char='')
         
         # Bucle de resolución del juego
         while (remaining_tries > 0):
