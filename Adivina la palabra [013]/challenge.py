@@ -18,3 +18,26 @@ DESCRIPTION:
  */
  
 """
+
+# IMPORTS -----
+import random
+from typing import List
+
+
+# FUNCTIONS -----
+
+def generate_random_word() -> str:
+    pass
+
+def remaining_tries(tries_counter:int) -> int:
+    pass
+
+def solving_word(original_word:str, word:str, selected_letters:List[str]):
+    pass
+
+def select_random_blanks_word(word:str):
+    pass
+
+
+if __name__ == "__main__":
+    pass
