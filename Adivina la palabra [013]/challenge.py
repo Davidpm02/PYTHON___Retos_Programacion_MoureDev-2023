@@ -39,7 +39,7 @@ def update_counter(tries_counter:int) -> int:
     tries_counter -= 1
     return tries_counter
 
-def solving_word(original_word:str, word:str, idx_to_char:Dict, selected_char:str):
+def solving_word(word:str, idx_to_char:Dict, selected_char:str, remaining_chars:int):
     
     # Obtengo los índices donde se posiciona el carácter escogido
     idxs_to_change = [idx for idx, char in idx_to_char.items() if (char == selected_char)]
@@ -50,12 +50,13 @@ def solving_word(original_word:str, word:str, idx_to_char:Dict, selected_char:st
         for idx, char in enumerate(chars_in_word):
             if idx in idxs_to_change:
                 chars_in_word[idx] = idx_to_char[idx]
+                remaining_chars -= 1
         word = "".join(chars_in_word)
         
         # Actualizo el diccionario eliminando estos índices
         for idx in idxs_to_change:
             del idx_to_char[idx]
-    return word
+    return word, remaining_chars
 
 def show_word_and_counter(word:str, counter_tries:int):
     
@@ -71,7 +72,7 @@ def select_random_blanks_word(word:str):
     
     # Calculo el 60% del total de caracteres, y escojo un 
     # número aleatorio de caracteres ocultos.
-    max_hidden_chars = n_chars * 0.6
+    max_hidden_chars = int(n_chars * 0.6)
     hidden_chars = random.randint(1, max_hidden_chars)
     
     # Selecciono aleatoriamente los caracteres a eliminar
@@ -84,6 +85,20 @@ def select_random_blanks_word(word:str):
     return idx_to_char
 
 
+def hide_chars_of_word(original_word:str, idx_to_char:Dict) -> str:
+
+    # Creo una nueva palabra con los caracteres ocultos 
+    # sustituidos por '_'.
+    chars_in_word = [char for char in original_word]
+    remaining_chars = 0
+    hidden_chars = []
+    for idx, char in enumerate(chars_in_word):
+        if (idx in idx_to_char):
+            chars_in_word[idx] = '_'
+            remaining_chars += 1
+            hidden_chars.append(char)
+    return "".join(chars_in_word), hidden_chars, remaining_chars
+
 def match_character(selected_char:str, hidden_chars:List[str]) -> bool:
     
     if (selected_char in hidden_chars):
@@ -95,7 +110,7 @@ def match_character(selected_char:str, hidden_chars:List[str]) -> bool:
 if __name__ == "__main__":
     
     print('¡Bienvenido al juego "Adivina la palabra"!')
-    user_input = input('Presiona cualquier tecla para comenzar.')
+    user_input = input('Escribe una tecla y pulsa Enter para comenzar.')
     if user_input:
         
         # Defino una variable inicial de referencia al estado de la partida
@@ -107,23 +122,25 @@ if __name__ == "__main__":
         
         # Oculto los caracteres de la palabra escogida
         idx_to_char = select_random_blanks_word(word=random_word)
-        word_to_solve, remaining_chars, hidden_chars = solving_word(original_word=random_word,
-                                                                    word=word_to_solve,
-                                                                    idx_to_char=idx_to_char,
-                                                                    selected_char='')
+        word_to_solve, hidden_chars, remaining_chars = hide_chars_of_word(original_word=random_word,
+                                                                          idx_to_char=idx_to_char)
         
         # Bucle de resolución del juego
         while (remaining_tries > 0):
             show_word_and_counter(word=word_to_solve,
                                   counter_tries=remaining_tries)
             selected_char = input('Selecciona una letra:')
-            if match_character(selected_char, hidden_chars):
-                word_to_solve, remaining_chars, hidden_chars = solving_word()
+            if match_character(selected_char=selected_char,
+                               hidden_chars=hidden_chars):
+                word_to_solve, remaining_chars = solving_word(word=word_to_solve,
+                                                              idx_to_char=idx_to_char,
+                                                              selected_char=selected_char,
+                                                              remaining_chars=remaining_chars)
                 if (remaining_chars == 0):
                     player_has_won = True
                     break
             else:
-                remaining_tries = update_counter(remaining_tries)
+                remaining_tries = update_counter(tries_counter=remaining_tries)
         if (player_has_won == True):
             print(f'¡Enhorabuena! La palabra escogida era: "{random_word}".')
         else:
